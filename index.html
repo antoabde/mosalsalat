@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html lang="it">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Mosalsalat — مسلسلات</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #0e0e12; --bg2: #16161c; --bg3: #1e1e26;
+      --border: rgba(255,255,255,0.08); --border2: rgba(255,255,255,0.14);
+      --text: #f0ede6; --text2: #a09a8e; --text3: #6b6560;
+      --gold: #c9a84c; --gold2: #e8c96e;
+      --font: 'Georgia', serif;
+    }
+    html, body { height: 100%; background: var(--bg); color: var(--text); font-family: var(--font); }
+    #app { display: flex; flex-direction: column; height: 100vh; }
+
+    header {
+      background: var(--bg2); border-bottom: 1px solid var(--border);
+      padding: 0 20px; display: flex; align-items: center; gap: 16px;
+      height: 56px; flex-shrink: 0; z-index: 100;
+    }
+    .logo { font-size: 18px; font-weight: bold; color: var(--gold); letter-spacing: 1px; white-space: nowrap; display: flex; align-items: center; gap: 8px; }
+    .logo-ar { font-size: 14px; color: var(--text2); font-style: italic; }
+    .search-bar { flex: 1; display: flex; align-items: center; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 0 12px; gap: 8px; max-width: 380px; }
+    .search-bar input { background: none; border: none; outline: none; color: var(--text); font-size: 14px; font-family: var(--font); width: 100%; padding: 8px 0; }
+    .search-bar input::placeholder { color: var(--text3); }
+
+    nav { background: var(--bg2); border-bottom: 1px solid var(--border); padding: 0 20px; display: flex; gap: 4px; overflow-x: auto; scrollbar-width: none; flex-shrink: 0; }
+    nav::-webkit-scrollbar { display: none; }
+    .nav-btn { padding: 10px 16px; font-size: 13px; font-family: var(--font); color: var(--text2); background: none; border: none; border-bottom: 2px solid transparent; cursor: pointer; white-space: nowrap; transition: color 0.2s, border-color 0.2s; display: flex; align-items: center; gap: 6px; }
+    .nav-btn:hover { color: var(--text); }
+    .nav-btn.active { color: var(--gold); border-bottom-color: var(--gold); }
+    .nav-btn .count { background: var(--bg3); color: var(--text3); font-size: 10px; padding: 1px 5px; border-radius: 10px; border: 1px solid var(--border); }
+
+    main { display: flex; flex: 1; overflow: hidden; }
+
+    .sidebar { width: 230px; min-width: 230px; background: var(--bg2); border-right: 1px solid var(--border); padding: 12px 0; overflow-y: auto; display: flex; flex-direction: column; gap: 2px; }
+    .sidebar-section { padding: 8px 16px 4px; font-size: 10px; letter-spacing: 1.5px; color: var(--text3); text-transform: uppercase; }
+
+    .custom-url-box { margin: 8px 12px 4px; background: var(--bg3); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 6px; }
+    .custom-url-box label { font-size: 10px; color: var(--text3); letter-spacing: 1px; text-transform: uppercase; }
+    .custom-url-row { display: flex; gap: 6px; }
+    .custom-url-box input { flex: 1; background: var(--bg2); border: 1px solid var(--border); border-radius: 6px; padding: 7px 10px; color: var(--text); font-size: 12px; font-family: monospace; outline: none; min-width: 0; }
+    .custom-url-box input:focus { border-color: var(--gold); }
+    .custom-url-box button { padding: 7px 12px; background: var(--gold); color: var(--bg); border: none; border-radius: 6px; font-size: 12px; font-weight: bold; cursor: pointer; font-family: var(--font); white-space: nowrap; transition: background 0.2s; }
+    .custom-url-box button:hover { background: var(--gold2); }
+
+    .site-item { display: flex; align-items: center; gap: 10px; padding: 9px 16px; cursor: pointer; transition: background 0.15s; border-left: 3px solid transparent; }
+    .site-item:hover { background: var(--bg3); }
+    .site-item.active { background: var(--bg3); border-left-color: var(--gold); }
+    .site-avatar { width: 28px; height: 28px; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: bold; flex-shrink: 0; }
+    .site-name { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .site-cat { font-size: 11px; color: var(--text3); }
+    .fav-star { margin-left: auto; font-size: 12px; cursor: pointer; color: var(--text3); transition: color 0.2s; flex-shrink: 0; }
+    .fav-star.starred { color: var(--gold); }
+    .del-site { font-size: 11px; color: var(--text3); cursor: pointer; transition: color 0.2s; flex-shrink: 0; margin-left: 4px; }
+    .del-site:hover { color: #e05a5a; }
+
+    .content-area { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
+
+    .welcome { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 16px; color: var(--text3); padding: 40px; text-align: center; }
+    .welcome .icon { font-size: 48px; }
+    .welcome h2 { font-size: 20px; color: var(--text2); }
+    .welcome p { font-size: 14px; max-width: 300px; line-height: 1.6; }
+
+    .iframe-header { display: none; align-items: center; gap: 10px; padding: 10px 16px; background: var(--bg2); border-bottom: 1px solid var(--border); flex-shrink: 0; }
+    .iframe-header.visible { display: flex; }
+    .iframe-url { flex: 1; background: var(--bg3); border: 1px solid var(--border); border-radius: 6px; padding: 6px 12px; font-size: 12px; color: var(--text2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-family: monospace; }
+    .open-btn { padding: 6px 14px; background: var(--gold); color: var(--bg); border: none; border-radius: 6px; font-size: 12px; cursor: pointer; font-weight: bold; white-space: nowrap; font-family: var(--font); transition: background 0.2s; }
+    .open-btn:hover { background: var(--gold2); }
+
+    .iframe-wrap { flex: 1; position: relative; overflow: hidden; }
+    iframe#viewer { width: 100%; height: 100%; border: none; display: none; background: #fff; }
+    iframe#viewer.visible { display: block; }
+
+    .blocked-msg { display: none; flex: 1; flex-direction: column; align-items: center; justify-content: center; gap: 12px; text-align: center; padding: 30px; }
+    .blocked-msg.visible { display: flex; }
+    .blocked-msg .icon { font-size: 40px; }
+    .blocked-msg h3 { font-size: 16px; color: var(--text2); }
+    .blocked-msg p { font-size: 13px; color: var(--text3); max-width: 320px; line-height: 1.6; }
+    .blocked-open { padding: 10px 22px; background: var(--gold); color: var(--bg); border: none; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; font-family: var(--font); margin-top: 8px; transition: background 0.2s; }
+    .blocked-open:hover { background: var(--gold2); }
+
+    .watchlist-panel { display: none; flex: 1; flex-direction: column; padding: 24px; overflow-y: auto; gap: 16px; }
+    .watchlist-panel.visible { display: flex; }
+    .watchlist-panel h2 { font-size: 18px; color: var(--text); border-bottom: 1px solid var(--border); padding-bottom: 12px; }
+    .wl-ar { color: var(--text3); font-size: 13px; margin-top: -10px; }
+    .wl-item { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 16px; display: flex; align-items: center; gap: 14px; }
+    .wl-num { width: 28px; height: 28px; border-radius: 50%; background: var(--bg3); border: 1px solid var(--border); display: flex; align-items: center; justify-content: center; font-size: 12px; color: var(--text2); flex-shrink: 0; }
+    .wl-info { flex: 1; }
+    .wl-title { font-size: 14px; color: var(--text); }
+    .wl-site { font-size: 12px; color: var(--text3); }
+    .wl-del { color: var(--text3); cursor: pointer; font-size: 14px; transition: color 0.2s; }
+    .wl-del:hover { color: #e05a5a; }
+    .wl-add { display: flex; gap: 8px; margin-top: 8px; flex-wrap: wrap; }
+    .wl-add input { flex: 1; min-width: 120px; background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 14px; color: var(--text); font-size: 13px; font-family: var(--font); outline: none; }
+    .wl-add input:focus { border-color: var(--gold); }
+    .wl-add select { background: var(--bg2); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; color: var(--text2); font-size: 13px; font-family: var(--font); outline: none; cursor: pointer; }
+    .wl-add button { padding: 10px 18px; background: var(--gold); color: var(--bg); border: none; border-radius: 8px; font-size: 13px; font-weight: bold; cursor: pointer; font-family: var(--font); transition: background 0.2s; }
+    .wl-add button:hover { background: var(--gold2); }
+    .empty-wl { color: var(--text3); font-size: 14px; text-align: center; padding: 30px; }
+
+    .sites-grid { display: none; flex: 1; flex-direction: column; padding: 20px; gap: 12px; overflow-y: auto; }
+    .sites-grid.visible { display: flex; }
+    .site-card { background: var(--bg2); border: 1px solid var(--border); border-radius: 10px; padding: 14px 18px; display: flex; align-items: center; gap: 14px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+    .site-card:hover { border-color: var(--border2); background: var(--bg3); }
+    .site-card-info { flex: 1; }
+    .site-card-name { font-size: 15px; color: var(--text); margin-bottom: 3px; }
+    .site-card-url { font-size: 12px; color: var(--text3); font-family: monospace; }
+    .site-card-cat { font-size: 11px; padding: 3px 8px; border-radius: 10px; background: var(--bg3); color: var(--text2); border: 1px solid var(--border); white-space: nowrap; }
+    .arrow { color: var(--text3); font-size: 16px; }
+
+    .toast { position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%) translateY(60px); background: var(--bg3); border: 1px solid var(--border2); color: var(--text); padding: 10px 20px; border-radius: 8px; font-size: 13px; transition: transform 0.3s ease; z-index: 9999; pointer-events: none; }
+    .toast.show { transform: translateX(-50%) translateY(0); }
+  </style>
+</head>
+<body>
+<div id="app">
+  <header>
+    <div class="logo">&#9733; <span>Mosalsalat</span><span class="logo-ar">مسلسلات</span></div>
+    <div class="search-bar">
+      <span style="color:var(--text3);font-size:14px">&#128269;</span>
+      <input type="text" id="searchInput" placeholder="Cerca sito... / ابحث..." oninput="filterSites()">
+    </div>
+  </header>
+
+  <nav>
+    <button class="nav-btn active" onclick="showTab('browse',this)" id="tab-browse">&#127916; Sfoglia <span class="count" id="cnt-all">0</span></button>
+    <button class="nav-btn" onclick="showTab('favorites',this)" id="tab-fav">&#9733; Preferiti <span class="count" id="cnt-fav">0</span></button>
+    <button class="nav-btn" onclick="showTab('watchlist',this)" id="tab-wl">&#128205; Watch List <span class="count" id="cnt-wl">0</span></button>
+  </nav>
+
+  <main>
+    <div class="sidebar" id="sidebar">
+      <div class="sidebar-section">URL personalizzato / رابط مخصص</div>
+      <div class="custom-url-box">
+        <label>Apri qualsiasi sito / افتح أي موقع</label>
+        <div class="custom-url-row">
+          <input type="text" id="customUrlInput" placeholder="https://..." onkeydown="if(event.key==='Enter')openCustomUrl()">
+          <button onclick="openCustomUrl()">&#9654; Vai</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:2px">
+          <input type="text" id="customNameInput" placeholder="Nome sito (opzionale)" style="flex:1;background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 10px;color:var(--text);font-size:11px;font-family:var(--font);outline:none">
+          <button onclick="saveCustomSite()" style="padding:6px 10px;background:var(--bg3);color:var(--text2);border:1px solid var(--border);border-radius:6px;font-size:11px;cursor:pointer;font-family:var(--font);white-space:nowrap">+ Salva</button>
+        </div>
+      </div>
+      <div class="sidebar-section" style="margin-top:8px">Siti / المواقع</div>
+      <div id="siteList"></div>
+    </div>
+
+    <div class="content-area">
+      <div class="sites-grid" id="sitesGrid"></div>
+      <div id="welcomeScreen" class="welcome">
+        <div class="icon">&#127916;</div>
+        <h2>Benvenuto — أهلاً وسهلاً</h2>
+        <p>Seleziona un sito dalla lista oppure incolla un URL personalizzato.</p>
+        <p style="font-size:12px;color:var(--text3);margin-top:4px">اختر موقعاً أو الصق رابطاً مخصصاً</p>
+      </div>
+      <div class="iframe-header" id="iframeHeader">
+        <div class="iframe-url" id="currentUrlDisplay">-</div>
+        <button class="open-btn" onclick="openExternal()">&#10137; Apri / فتح</button>
+      </div>
+      <div class="iframe-wrap">
+        <iframe id="viewer" sandbox="allow-scripts allow-same-origin allow-forms allow-popups" allowfullscreen></iframe>
+        <div class="blocked-msg" id="blockedMsg">
+          <div class="icon">&#128683;</div>
+          <h3>Sito non incorporabile</h3>
+          <p>Questo sito blocca la visualizzazione in iframe (X-Frame-Options). Aprilo direttamente in una nuova scheda.</p>
+          <p style="font-size:12px;color:var(--text3);margin-top:4px">هذا الموقع لا يسمح بالتضمين — افتحه في تبويب جديد</p>
+          <button class="blocked-open" onclick="openExternal()">&#10137; Apri in nuova scheda / فتح في تبويب جديد</button>
+        </div>
+      </div>
+      <div class="watchlist-panel" id="watchlistPanel">
+        <h2>&#128205; Watch List</h2>
+        <p class="wl-ar">قائمة المشاهدة</p>
+        <div class="wl-add">
+          <input type="text" id="wlInput" placeholder="Nome serie / اسم المسلسل...">
+          <select id="wlStatus">
+            <option value="planned">Da vedere</option>
+            <option value="watching">In corso</option>
+            <option value="done">Finito</option>
+          </select>
+          <button onclick="addToWatchlist()">+ Aggiungi</button>
+        </div>
+        <div id="watchlistItems"></div>
+      </div>
+    </div>
+  </main>
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const DEFAULT_SITES = [
+  { id:1, name:"Farfesh Plus", nameAr:"فرفش بلس", url:"https://www.farfeshplus.mosalsalatpro.online/FP87.asp", cat:"Drama مصري", color:"#c9a84c", custom:false },
+  { id:2, name:"Viola", nameAr:"فيولا", url:"https://vio-la.com/index.php", cat:"مسلسلات وأفلام", color:"#8e44ad", custom:false },
+];
+let SITES = JSON.parse(localStorage.getItem('mos_sites') || 'null') || DEFAULT_SITES;
+let currentSite = null, currentUrl = null;
+let favorites = JSON.parse(localStorage.getItem('mos_fav') || '[]');
+let watchlist = JSON.parse(localStorage.getItem('mos_wl') || '[]');
+
+function save() {
+  localStorage.setItem('mos_fav', JSON.stringify(favorites));
+  localStorage.setItem('mos_wl', JSON.stringify(watchlist));
+  localStorage.setItem('mos_sites', JSON.stringify(SITES));
+}
+function openCustomUrl() {
+  let url = document.getElementById('customUrlInput').value.trim();
+  if (!url) return;
+  if (!url.startsWith('http')) url = 'https://' + url;
+  loadUrl(url, null);
+  showTab('browse', document.getElementById('tab-browse'));
+}
+function saveCustomSite() {
+  let url = document.getElementById('customUrlInput').value.trim();
+  if (!url) { toast('Inserisci prima un URL'); return; }
+  if (!url.startsWith('http')) url = 'https://' + url;
+  let name;
+  try { name = document.getElementById('customNameInput').value.trim() || new URL(url).hostname; } catch(e) { name = url; }
+  SITES.push({ id: Date.now(), name, nameAr: name, url, cat:'Personalizzato', color:'#3a7bd5', custom:true });
+  save(); updateCounts(); renderSidebar(SITES);
+  document.getElementById('customUrlInput').value = '';
+  document.getElementById('customNameInput').value = '';
+  toast('Sito salvato: ' + name);
+}
+function deleteSite(e, id) {
+  e.stopPropagation();
+  SITES = SITES.filter(s => s.id !== id);
+  favorites = favorites.filter(f => f !== id);
+  save(); updateCounts(); renderSidebar(SITES);
+  toast('Sito rimosso');
+}
+function loadUrl(url, site) {
+  currentSite = site; currentUrl = url;
+  const viewer = document.getElementById('viewer');
+  const blocked = document.getElementById('blockedMsg');
+  viewer.classList.remove('visible'); blocked.classList.remove('visible');
+  document.getElementById('currentUrlDisplay').textContent = url;
+  document.getElementById('iframeHeader').classList.add('visible');
+  document.getElementById('welcomeScreen').style.display = 'none';
+  viewer.onload = function() {
+    try { const doc = viewer.contentDocument || viewer.contentWindow.document; if (!doc || !doc.body) { showBlocked(); return; } } catch(e) {}
+    viewer.classList.add('visible'); blocked.classList.remove('visible');
+  };
+  viewer.onerror = () => showBlocked();
+  viewer.src = url;
+  setTimeout(() => { if (!viewer.classList.contains('visible')) showBlocked(); }, 4000);
+  renderSidebar(SITES);
+}
+function showBlocked() {
+  document.getElementById('viewer').classList.remove('visible');
+  document.getElementById('blockedMsg').classList.add('visible');
+}
+function loadSite(site) { loadUrl(site.url, site); toast('Apertura: ' + site.name); }
+function openExternal() { if (currentUrl) window.open(currentUrl, '_blank'); }
+function showTab(tab, btn) {
+  document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+  if (btn) btn.classList.add('active');
+  const ids = ['welcomeScreen','iframeHeader','blockedMsg','watchlistPanel','sitesGrid'];
+  document.getElementById('viewer').classList.remove('visible');
+  document.getElementById('iframeHeader').classList.remove('visible');
+  document.getElementById('blockedMsg').classList.remove('visible');
+  document.getElementById('watchlistPanel').classList.remove('visible');
+  document.getElementById('sitesGrid').classList.remove('visible');
+  document.getElementById('welcomeScreen').style.display = 'none';
+  const sidebar = document.getElementById('sidebar');
+  if (tab === 'browse') {
+    sidebar.style.display = 'flex';
+    if (currentUrl) { document.getElementById('currentUrlDisplay').textContent = currentUrl; document.getElementById('iframeHeader').classList.add('visible'); document.getElementById('viewer').classList.add('visible'); }
+    else document.getElementById('welcomeScreen').style.display = 'flex';
+  } else if (tab === 'favorites') {
+    sidebar.style.display = 'none';
+    document.getElementById('sitesGrid').classList.add('visible');
+    renderGrid(SITES.filter(s => favorites.includes(s.id)));
+  } else if (tab === 'watchlist') {
+    sidebar.style.display = 'none';
+    document.getElementById('watchlistPanel').classList.add('visible');
+    renderWatchlist();
+  }
+}
+function filterSites() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  renderSidebar(SITES.filter(s => s.name.toLowerCase().includes(q) || s.nameAr.includes(q) || s.cat.toLowerCase().includes(q)));
+}
+function renderSidebar(list) {
+  const el = document.getElementById('siteList'); el.innerHTML = '';
+  list.forEach(s => {
+    const div = document.createElement('div');
+    div.className = 'site-item' + (currentSite?.id === s.id ? ' active' : '');
+    div.onclick = () => loadSite(s);
+    const isFav = favorites.includes(s.id);
+    div.innerHTML = `<div class="site-avatar" style="background:${s.color}22;color:${s.color}">${s.name[0]}</div><div style="flex:1;min-width:0"><div class="site-name">${s.name}</div><div class="site-cat">${s.cat}</div></div><span class="fav-star ${isFav?'starred':''}" onclick="toggleFav(event,${s.id})">&#9733;</span>${s.custom?`<span class="del-site" onclick="deleteSite(event,${s.id})">&#10005;</span>`:''}`;
+    el.appendChild(div);
+  });
+}
+function renderGrid(list) {
+  const el = document.getElementById('sitesGrid'); el.innerHTML = '';
+  if (!list.length) { el.innerHTML = '<div class="empty-wl">Nessun preferito ancora &#9733;<br><span style="font-size:12px;color:var(--text3)">لا توجد مفضلة بعد</span></div>'; return; }
+  list.forEach(s => {
+    const card = document.createElement('div'); card.className = 'site-card';
+    card.onclick = () => { showTab('browse', document.getElementById('tab-browse')); loadSite(s); };
+    card.innerHTML = `<div style="width:36px;height:36px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;font-weight:bold;flex-shrink:0;background:${s.color}22;color:${s.color}">${s.name[0]}</div><div class="site-card-info"><div class="site-card-name">${s.name} <span style="font-size:12px;color:var(--text3)">${s.nameAr}</span></div><div class="site-card-url">${s.url}</div></div><span class="site-card-cat">${s.cat}</span><span class="arrow">&#8250;</span>`;
+    el.appendChild(card);
+  });
+}
+function toggleFav(e, id) {
+  e.stopPropagation();
+  const i = favorites.indexOf(id);
+  if (i > -1) favorites.splice(i, 1); else favorites.push(id);
+  save(); updateCounts(); renderSidebar(SITES);
+  toast(i > -1 ? 'Rimosso dai preferiti' : 'Aggiunto ai preferiti ★');
+}
+function addToWatchlist() {
+  const title = document.getElementById('wlInput').value.trim();
+  if (!title) return;
+  watchlist.push({ id: Date.now(), title, status: document.getElementById('wlStatus').value, site: currentSite?.name || '-' });
+  document.getElementById('wlInput').value = '';
+  save(); updateCounts(); renderWatchlist(); toast('Aggiunto alla watch list!');
+}
+function removeWl(id) { watchlist = watchlist.filter(w => w.id !== id); save(); updateCounts(); renderWatchlist(); }
+function changeWlStatus(id, status) { const item = watchlist.find(w => w.id === id); if (item) { item.status = status; save(); renderWatchlist(); } }
+function renderWatchlist() {
+  const el = document.getElementById('watchlistItems'); el.innerHTML = '';
+  if (!watchlist.length) { el.innerHTML = '<div class="empty-wl">La watch list è vuota<br><span style="font-size:12px;color:var(--text3)">قائمة المشاهدة فارغة</span></div>'; return; }
+  watchlist.forEach((w, i) => {
+    const div = document.createElement('div'); div.className = 'wl-item';
+    div.innerHTML = `<div class="wl-num">${i+1}</div><div class="wl-info"><div class="wl-title">${w.title}</div><div class="wl-site">via ${w.site}</div></div><select onchange="changeWlStatus(${w.id},this.value)" style="background:var(--bg3);border:1px solid var(--border);color:var(--text2);font-size:11px;padding:3px 8px;border-radius:10px;cursor:pointer;font-family:var(--font);outline:none"><option value="planned" ${w.status==='planned'?'selected':''}>Da vedere</option><option value="watching" ${w.status==='watching'?'selected':''}>In corso</option><option value="done" ${w.status==='done'?'selected':''}>Finito</option></select><span class="wl-del" onclick="removeWl(${w.id})">&#10005;</span>`;
+    el.appendChild(div);
+  });
+}
+function updateCounts() {
+  document.getElementById('cnt-all').textContent = SITES.length;
+  document.getElementById('cnt-fav').textContent = favorites.length;
+  document.getElementById('cnt-wl').textContent = watchlist.length;
+}
+function toast(msg) {
+  const t = document.getElementById('toast'); t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+renderSidebar(SITES); updateCounts();
+</script>
+</body>
+</html>
